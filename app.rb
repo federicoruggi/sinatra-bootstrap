@@ -1,14 +1,22 @@
 require 'rubygems'
 require 'sinatra/base'
-require 'haml'
+require 'sinatra/reloader'
+require 'slim'
 
 class SinatraBootstrap < Sinatra::Base
-  require './helpers/render_partial'
-
-  get '/' do
-    haml :index
+  get '/*' do
+    begin
+      slim params['splat'].join('').to_sym
+    rescue StandardError => e
+      e.to_s
+    end
   end
 
-  # start the server if ruby file executed directly
-  run! if app_file == $0
+  Dir['views/*.slim'].each do |tpl|
+    name = File.basename(tpl, '.slim')
+    send('get', name.to_sym) do
+    end
+  end
+
+  run! if app_file == $PROGRAM_NAME
 end
